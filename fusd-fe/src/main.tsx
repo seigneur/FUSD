@@ -6,7 +6,7 @@ import { Theme } from 'react-daisyui'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Theme dataTheme="light">
+    <Theme dataTheme="cyberpunk">
       <App />
     </Theme>
   </React.StrictMode>
