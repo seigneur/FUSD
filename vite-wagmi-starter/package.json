@@ -11,6 +11,7 @@
   "dependencies": {
     "@did-network/dapp-sdk": "^0.1.8",
     "@ethersproject/abi": "^5.6.4",
+    "@headlessui/react": "^1.7.4",
     "@unocss/reset": "^0.45.13",
     "antd": "^4.19.2",
     "axios": "^0.26.1",
@@ -24,6 +25,7 @@
     "wagmi": "^0.7.8"
   },
   "devDependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@iconify-json/carbon": "^1.1.4",
     "@svgr/core": "^6.2.1",
     "@types/react": "^17.0.33",
@@ -32,6 +34,7 @@
     "@unocss/preset-wind": "^0.45.13",
     "@vitejs/plugin-legacy": "^2.1.0",
     "@vitejs/plugin-react": "^2.1.0",
+    "autoprefixer": "^10.4.13",
     "eslint": "^8.14.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-react-app": "^7.0.1",
@@ -41,8 +44,10 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "less": "^4.1.2",
     "pkg-exports": "^0.0.2",
+    "postcss": "^8.4.18",
     "prettier": "2.7.0",
     "rollup-plugin-visualizer": "^5.6.0",
+    "tailwindcss": "^3.2.2",
     "typescript": "^4.7.4",
     "unocss": "^0.45.13",
     "unplugin-auto-import": "^0.11.2",

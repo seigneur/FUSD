@@ -1,0 +1,10 @@
+#root {
+  max-height: max-content;
+}
+
+.item {
+	@apply
+		text-xl font-bold
+		flex items-center content-center justify-center
+		rounded
+}
