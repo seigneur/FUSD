@@ -1,9 +1,10 @@
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useEnsName } from 'wagmi'
 import { InjectedConnector } from 'wagmi/connectors/injected'
-import { Button, Card, Collapse, Input, Stats, Tabs } from "react-daisyui";
+import { Button, Card, Collapse, Divider, Input, Stats, Tabs } from "react-daisyui";
 
 export const Profile = ()  => {
  const { address, isConnected } = useAccount()
+ const { data: ensName } = useEnsName({ address, chainId:1 }) //ens is available only on chain 1
  const { connect } = useConnect({
  connector: new InjectedConnector(),
  })
@@ -11,13 +12,10 @@ export const Profile = ()  => {
 
  if (isConnected)
  return (
-  <div className="flex flex-col justify-center items-center h-auto w-auto">
+  <div>
 
-<p> Hi, {address}</p> 
-<p>choose a Proof Of Reserve asset and take a loan!</p>
- <div className="h-8" />
- 
- <Button onClick={() => disconnect()}>Disconnect</Button>
+<span>Hi, {ensName ?? address} </span> 
+ <Button  onClick={() => disconnect()}>Disconnect</Button>
  </div>
  )
  return <Button onClick={() => connect()}>Connect Wallet</Button>
