@@ -20,24 +20,30 @@ contract Reactor is ReentrancyGuard {
     address immutable public collateral;
     address immutable public oracleAddress;
     address immutable public PoR;
+    address immutable public TREASURY;
+    address immutable fusdERC20;
     uint256 constant durationForMaturity = 94608000;
     uint constant public decimals = 18;
-    address immutable fusdERC20;
 
-    constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20, address _por) {
+    constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20, address _por, address _treasury) {
         PoR = _por;
         collateral = _collateral;
         oracleAddress = _oracle;
         fusdNFT = IFusdNFT(address(_fusdNFT));
         fusdERC20 = _fusdERC20;
+        TREASURY = _treasury;
     }
 
     function borrow(uint256 amount)
         external
         nonReentrant
+        payable
         returns (uint256)
     {
         require(IVerifyPoR(PoR).verifyPoRCGT(), "Not enough reserves");
+        require(msg.value >= 0.001 ether, "Insufficient fees to borrow!");
+        payable(TREASURY).transfer(0.0008 ether);// move to treasury to fund the lending side
+        block.coinbase.transfer(0.0002 ether);// pay the community, later change this to only if solo staker
         uint256 forgePrice = uint256(
             priceFromOracle(oracleAddress)
         );
@@ -96,46 +102,42 @@ contract Reactor is ReentrancyGuard {
 
     function repay(uint256 tokenId) external nonReentrant returns (bool) {
         FUSDInfo memory _fusd;
-        uint256 timeToMaturity;
+        uint256 forgePrice;
         address fusdVault;
-
-        address borrower = fusdNFT.ownerOf(tokenId); 
+        address borrower = fusdNFT.borrowerOf(tokenId); 
         (
             _fusd.amount,
-            timeToMaturity,
+            forgePrice,
             fusdVault
         ) = fusdNFT.getFUSD(tokenId);
         _fusd.balance = IERC20Burnable(address(fusdERC20)).balanceOf(
             msg.sender
         );
 
-        require(_fusd.amount <= _fusd.balance, "Need more Steady");
-        uint256 fusdAmount = Vault(fusdVault)
-            .getBalance(collateral);
-        address[] memory beneficiaries = new address[](2);
-        uint256[] memory beneficiaryAmounts = new uint256[](2);
-        beneficiaries[0] = borrower;
-        beneficiaryAmounts[0] = fusdAmount;
+        require(_fusd.amount <= _fusd.balance, "Need more FUSD");
+        
+        uint256 collateralAmount = Vault(fusdVault).getBalance(collateral);
+        address sendToAddress = borrower;
+        uint256 sendToAmount = collateralAmount;
 
-        if (timeToMaturity > block.timestamp) {
+        //Has the price decreased by 25% of initial value
+        int256 maxPriceDecrease =  int256(forgePrice) - ((int256(forgePrice) * 2500) / 10_000);
+        // if the borrower is above water do not let other's liquidate position
+        if (priceFromOracle(oracleAddress) - maxPriceDecrease >= 0) {
             require(
                 borrower == msg.sender,
-                "You need to be the creator!"
+                "You need to be the borrower!"
             );
         } else {
-            beneficiaryAmounts[0] =
-                (fusdAmount *
-                    (20)) /
-                100;
-            beneficiaries[1] = msg.sender;
-            beneficiaryAmounts[1] =
-                (fusdAmount * 80) /
-                100;
+            //assuming that the msg.sender/liquidator was funded by the treasury
+            //TODO: Club into one txn to swap n uniswap
+            //TODO: How to handle mass liquidations
+            sendToAddress = TREASURY; 
+            sendToAmount = collateralAmount;
         }
         Vault(fusdVault).mergeAndClose(
             IERC20(collateral),
-            beneficiaries,
-            beneficiaryAmounts
+            sendToAddress
         );
 
         IERC20Burnable(address(fusdERC20)).burnFrom(

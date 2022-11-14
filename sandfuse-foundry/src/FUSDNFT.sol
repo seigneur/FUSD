@@ -6,7 +6,7 @@ import "openzeppelin-contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "openzeppelin-contracts/utils/Counters.sol";
 import "openzeppelin-contracts/access/AccessControl.sol";
 
-contract FusdNFT is ERC721, ERC721Burnable, AccessControl {
+contract FUSDNFT is ERC721, ERC721Burnable, AccessControl {
     using Counters for Counters.Counter;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter public tokenIdCounter;
