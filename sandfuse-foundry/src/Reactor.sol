@@ -1,81 +1,65 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
-
-import "openzeppelin-contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
-import "openzeppelin-contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-
+import "openzeppelin-contracts/security/ReentrancyGuard.sol";
+import "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IERC20BurnableUpgradeable.sol";
 import "./interfaces/IFusdNFT.sol";
 import "./Vault.sol";
-
 import "./interfaces/IVault.sol";
 
 contract Reactor is ReentrancyGuardUpgradeable, Initializable {
     using SafeERC20Upgradeable for IERC20;
     using SafeERC20Upgradeable for IERC20BurnableUpgradeable;
 
-    enum Ratios {
-        LOW,
-        MEDIUM,
-        HIGH
-    }
-
-    struct TokenInfo {
+    struct FUSDInfo {
         uint256 balance;
         uint256 amount;
     }
 
-    address public FUSD_NFT;
+    address immutable public FUSD_NFT;
     IFusdNFT fusdNFT;
-    address public factory;
-    address public collateral;
+    address immutable public collateral;
+    address immutable oracleAddress;
+    uint256 durationForMaturity;
+    address immutable fusdERC20;
 
-    function initialize(address _collateral, address _fusdNFT) public initializer {
+    function constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20) {
         collateral = _collateral;
-        factory = msg.sender;
+        oracleAddress = _oracle;
         fusdNFT = IFusdNFT(address(_fusdNFT));
+        fusdERC20 = _fusdERC20
     }
 
-    function borrow(uint256 amount, Ratios ratioOfSteady)
+    function borrow(uint256 amount)
         external
         nonReentrant
         returns (bool)
     {
-        (
-            address oracleAddress,
-            uint8 fees,
-            uint8 decimals,
-            uint256 durationForMaturity,
-            ,
-            address steadyImplForChyme,
-            address steadyDAOReward
-        ) = IFactory(address(factory)).getChymeInfo(chyme);
-
         uint256 forgePrice = uint256(
-            Ifactory(address(factory)).priceFromOracle(oracleAddress)
+            priceFromOracle(oracleAddress)
         );
-
-        uint256 sChymeAmt = ((amount *
-            (75 - (25 * uint8(ratioOfSteady))) *
+        //allow to borrow 80% Value
+        uint256 fusdAmt = ((amount *
+            80 * 
             uint256(forgePrice)) / (100 * (10**decimals * 10**decimals))) *
             (10**18);
 
-        address chymeVaultDeployed = generateVault();
-        IERC20(address(chyme)).safeTransferFrom(
+        //move the funds to a vault to keep funds segregated
+        address vaultCollateral = generateVault();
+        IERC20(address(collateralAddress)).safeTransferFrom(
             msg.sender,
-            chymeVaultDeployed,
+            vaultCollateral,
             amount
         );
 
-        IERC20Burnable(address(steadyImplForChyme)).mint(msg.sender, sChymeAmt);
+        IERC20Burnable(address(fusdERC20)).mint(msg.sender, fusdAmt);
 
-        uint256 tokenId = mintElixir(
+        uint256 tokenId = mintFUSDNFT(
             amount,
-            ratioOfSteady,
+            0,
             forgePrice,
             durationForMaturity,
-            chymeVaultDeployed,
+            vaultCollateral,
             decimals
         );
         return true;
@@ -92,89 +76,90 @@ contract Reactor is ReentrancyGuardUpgradeable, Initializable {
             );
     }
 
-    function mintElixir(
+    function mintFUSDNFT(
         uint256 amount,
         Ratios ratioOfSteady,
         uint256 forgePrice,
-        uint256 durationForMaturity,
-        address chymeVaultDeployed,
+        address fusdVault,
         uint decimals
     ) internal returns (uint256 tokenId) {
-        tokenId = elixir.safeMint(
+        tokenId = fusdNFT.safeMint(
             msg.sender,
-            chyme,
-            (75 - (25 * uint8(ratioOfSteady))), //25,50,75
+            collateral,
+            80,
             forgePrice,
             amount,
             block.timestamp + durationForMaturity,
-            chymeVaultDeployed,
+            fusdVault,
             decimals
         );
         return tokenId;
     }
 
     function repay(uint256 tokenId) external nonReentrant returns (bool) {
-        TokenInfo memory _steady;
+        FUSDInfo memory _fusd;
         uint256 timeToMaturity;
-        uint256 ratioOfSteady;
-        address chymeVaultDeployed;
+        address fusdVault;
 
-        address chymeBeneficiary = elixir.ownerOf(tokenId);
-        (, uint256 fees, , , , address steadyImplForChyme, address steadyDAOReward) = Ifactory(
-            address(factory)
-        ).getChymeInfo(chyme);
+        address borrower = fusdNFT.ownerOf(tokenId); 
         (
-            _steady.amount,
-            ratioOfSteady,
+            _fusd.amount,
             timeToMaturity,
-            chymeVaultDeployed
-        ) = elixir.getSteadyRequired(tokenId);
-        _steady.balance = IERC20Burnable(address(steadyImplForChyme)).balanceOf(
+            fusdVault
+        ) = fusdNFT.getFUSD(tokenId);
+        _fusd.balance = IERC20Burnable(address(fusdERC20)).balanceOf(
             msg.sender
         );
 
-        require(_steady.amount <= _steady.balance, "Need more Steady");
-        uint256 totalChymeInVaultToMerge = IVault(chymeVaultDeployed)
-            .getBalance(chyme);
+        require(_fusd.amount <= _fusd.balance, "Need more Steady");
+        uint256 fusdAmount = IVault(fusdVault)
+            .getBalance(collateralAddress);
         address[] memory beneficiaries = new address[](2);
         uint256[] memory beneficiaryAmounts = new uint256[](2);
-        beneficiaries[0] = chymeBeneficiary;
-        beneficiaryAmounts[0] = totalChymeInVaultToMerge;
+        beneficiaries[0] = borrower;
+        beneficiaryAmounts[0] = fusdAmount;
 
         if (timeToMaturity > block.timestamp) {
             require(
-                chymeBeneficiary == msg.sender,
+                borrower == msg.sender,
                 "You need to be the creator!"
             );
         } else {
             beneficiaryAmounts[0] =
-                (totalChymeInVaultToMerge *
-                    (100 - (75 - (25 * ratioOfSteady)))) /
+                (fusdAmount *
+                    (20)) /
                 100;
             beneficiaries[1] = msg.sender;
             beneficiaryAmounts[1] =
-                (totalChymeInVaultToMerge * (75 - (25 * ratioOfSteady))) /
+                (fusdAmount * 80)) /
                 100;
         }
-        IVault(chymeVaultDeployed).mergeAndClose(
-            IERC20(chyme),
+        IVault(fusdVault).mergeAndClose(
+            IERC20(collateralAddress),
             beneficiaries,
             beneficiaryAmounts
         );
 
-        IERC20Burnable(address(steadyImplForChyme)).burnFrom(
+        IERC20Burnable(address(fusdERC20)).burnFrom(
             msg.sender,
-            _steady.amount
+            _fusd.amount
         );
-        performMergeActions(totalChymeInVaultToMerge , tokenId);
+        fusdNFT.burn(tokenId);
         return true;
     }
 
-    function performMergeActions(uint256 amount, uint256 tokenId) internal {
-        fusdNFT.burn(tokenId);
-    }
-
-    function getCollateral() public view returns (address) {
-        return collateral;
+    //get the WBTC price from chainlink
+    function priceFromOracle(address _priceOracle)
+        public
+        view
+        returns (int256 price)
+    {
+        bytes memory payload = abi.encodeWithSignature("latestAnswer()");
+        (, bytes memory returnData) = address(_priceOracle).staticcall(payload);
+        (price) = abi.decode(returnData, (int256));
+        require(
+            price >= 1 && price <= 1000000000000000000000000000000,
+            "Oracle price is out of range"
+        );
     }
 }
