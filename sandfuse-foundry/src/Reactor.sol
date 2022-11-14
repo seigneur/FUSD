@@ -5,7 +5,7 @@ import "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IERC20Burnable.sol";
 import "./interfaces/IFusdNFT.sol";
 import "./Vault.sol";
-import "./interfaces/IVault.sol";
+import "./interfaces/IVerifyPoR.sol";
 
 contract Reactor is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -18,12 +18,14 @@ contract Reactor is ReentrancyGuard {
 
     IFusdNFT fusdNFT;
     address immutable public collateral;
-    address immutable oracleAddress;
+    address immutable public oracleAddress;
+    address immutable public PoR;
     uint256 constant durationForMaturity = 94608000;
     uint constant public decimals = 18;
     address immutable fusdERC20;
 
-    constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20) {
+    constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20, address _por) {
+        PoR = _por;
         collateral = _collateral;
         oracleAddress = _oracle;
         fusdNFT = IFusdNFT(address(_fusdNFT));
@@ -35,6 +37,7 @@ contract Reactor is ReentrancyGuard {
         nonReentrant
         returns (uint256)
     {
+        require(IVerifyPoR(PoR).verifyPoRCGT(), "Not enough reserves");
         uint256 forgePrice = uint256(
             priceFromOracle(oracleAddress)
         );
@@ -42,7 +45,7 @@ contract Reactor is ReentrancyGuard {
         uint256 fusdAmt = ((amount *
             80 * 
             uint256(forgePrice)) / (100 * (10**decimals * 10**decimals))) *
-            (10**18);
+            (10**decimals);
 
         //move the funds to a vault to keep funds segregated
         address vaultCollateral = generateVault();
@@ -107,7 +110,7 @@ contract Reactor is ReentrancyGuard {
         );
 
         require(_fusd.amount <= _fusd.balance, "Need more Steady");
-        uint256 fusdAmount = IVault(fusdVault)
+        uint256 fusdAmount = Vault(fusdVault)
             .getBalance(collateral);
         address[] memory beneficiaries = new address[](2);
         uint256[] memory beneficiaryAmounts = new uint256[](2);
@@ -129,7 +132,7 @@ contract Reactor is ReentrancyGuard {
                 (fusdAmount * 80) /
                 100;
         }
-        IVault(fusdVault).mergeAndClose(
+        Vault(fusdVault).mergeAndClose(
             IERC20(collateral),
             beneficiaries,
             beneficiaryAmounts
