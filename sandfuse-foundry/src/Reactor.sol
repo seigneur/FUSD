@@ -101,8 +101,9 @@ contract Reactor is ReentrancyGuard {
         FUSDInfo memory _fusd;
         uint256 fusePrice;
         address fusdVault;
-        address borrower = fusdNFT.borrowerOf(tokenId); 
-        (
+        address borrower; 
+        (   
+            borrower,
             _fusd.amount,
             fusePrice,
             fusdVault

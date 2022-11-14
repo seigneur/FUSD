@@ -5,13 +5,15 @@ import "openzeppelin-contracts/token/ERC721/ERC721.sol";
 import "openzeppelin-contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "openzeppelin-contracts/utils/Counters.sol";
 import "openzeppelin-contracts/access/AccessControl.sol";
+import "openzeppelin-contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "./interfaces/IRenderer.sol";
 
 contract FUSDNFT is ERC721, ERC721Burnable, AccessControl {
     using Counters for Counters.Counter;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter public tokenIdCounter;
     address immutable public TREASURY;
-
+    address immutable public ORACLE;
     struct Fused {
         uint256 amount;
         uint256 fusePrice;
@@ -26,11 +28,13 @@ contract FUSDNFT is ERC721, ERC721Burnable, AccessControl {
      */
     constructor(string memory name_,
         string memory symbol_, 
-        address _treasury) 
+        address _treasury,
+        address _priceOracle) 
         ERC721(name_, 
         symbol_
     ) {
         TREASURY = _treasury;
+        ORACLE = _priceOracle;
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MINTER_ROLE, msg.sender);
     }
@@ -79,7 +83,31 @@ contract FUSDNFT is ERC721, ERC721Burnable, AccessControl {
 
     function getFUSD(uint256 tokenId) external view returns(uint256, uint256, address) {
         Fused currentElement =  fusedElements[tokenId];
-        return (currentElement.amount, currentElement.fusePrice, currentElement.vault);
+        return (currentElement.borrower, currentElement.amount, currentElement.fusePrice, currentElement.vault);
     } 
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        Fused currentElement =  fusedElements[tokenId];
+        return IRender.render(tokenId, priceFromOracle * currentElement.amount);
+    }
+
+    function priceFromOracle()
+        public
+        view
+        returns (int256 price)
+    {
+        bytes memory payload = abi.encodeWithSignature("latestAnswer()");
+        (, bytes memory returnData) = address(ORACLE).staticcall(payload);
+        (price) = abi.decode(returnData, (int256));
+        require(
+            price >= 1 && price <= 1000000000000000000000000000000,
+            "Oracle price is out of range"
+        );
+    }
 
 }
