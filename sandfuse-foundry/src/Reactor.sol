@@ -44,13 +44,13 @@ contract Reactor is ReentrancyGuard {
         require(msg.value >= 0.001 ether, "Insufficient fees to borrow!");
         payable(TREASURY).transfer(0.0008 ether);// move to treasury to fund the lending side
         block.coinbase.transfer(0.0002 ether);// pay the community, later change this to only if solo staker
-        uint256 forgePrice = uint256(
+        uint256 fusePrice = uint256(
             priceFromOracle(oracleAddress)
         );
         //allow to borrow 80% Value
         uint256 fusdAmt = ((amount *
             80 * 
-            uint256(forgePrice)) / (100 * (10**decimals * 10**decimals))) *
+            uint256(fusePrice)) / (100 * (10**decimals * 10**decimals))) *
             (10**decimals);
 
         //move the funds to a vault to keep funds segregated
@@ -65,7 +65,7 @@ contract Reactor is ReentrancyGuard {
 
         uint256 tokenId = mintFUSDNFT(
             amount,
-            forgePrice,
+            fusePrice,
             vaultCollateral
         );
         return tokenId;
@@ -84,30 +84,27 @@ contract Reactor is ReentrancyGuard {
 
     function mintFUSDNFT(
         uint256 amount,
-        uint256 forgePrice,
+        uint256 fusePrice,
         address fusdVault
     ) internal returns (uint256 tokenId) {
         tokenId = fusdNFT.safeMint(
             msg.sender,
-            collateral,
-            80,
-            forgePrice,
             amount,
-            block.timestamp + durationForMaturity,
-            fusdVault,
-            decimals
+            fusePrice,
+            collateral,
+            fusdVault
         );
         return tokenId;
     }
 
     function repay(uint256 tokenId) external nonReentrant returns (bool) {
         FUSDInfo memory _fusd;
-        uint256 forgePrice;
+        uint256 fusePrice;
         address fusdVault;
         address borrower = fusdNFT.borrowerOf(tokenId); 
         (
             _fusd.amount,
-            forgePrice,
+            fusePrice,
             fusdVault
         ) = fusdNFT.getFUSD(tokenId);
         _fusd.balance = IERC20Burnable(address(fusdERC20)).balanceOf(
@@ -121,7 +118,7 @@ contract Reactor is ReentrancyGuard {
         uint256 sendToAmount = collateralAmount;
 
         //Has the price decreased by 25% of initial value
-        int256 maxPriceDecrease =  int256(forgePrice) - ((int256(forgePrice) * 2500) / 10_000);
+        int256 maxPriceDecrease =  int256(fusePrice) - ((int256(fusePrice) * 2500) / 10_000);
         // if the borrower is above water do not let other's liquidate position
         if (priceFromOracle(oracleAddress) - maxPriceDecrease >= 0) {
             require(

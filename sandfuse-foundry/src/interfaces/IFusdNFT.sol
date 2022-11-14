@@ -8,5 +8,10 @@ interface IFusdNFT is IERC721 {
     function getCurrentTokenId() external view returns (uint256);
     function borrowerOf(uint tokenId) external view returns (address);
     function getFUSD(uint256 tokenId) external view returns(uint256, uint256,address); 
-    function safeMint( address _to, address _chyme, uint8 ratio, uint256 _forgePrice, uint256 _amount, uint256 _timeToMaturity, address _chymeVault, uint _decimals ) external returns(uint256);
+    function safeMint(        
+        address _borrower,        
+        uint256 _amount,
+        uint256 _forgePrice,
+        address _collateral,
+        address _vault ) external returns(uint256);
 }
