@@ -2,38 +2,38 @@
 pragma solidity 0.8.16;
 import "openzeppelin-contracts/security/ReentrancyGuard.sol";
 import "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
-import "./interfaces/IERC20BurnableUpgradeable.sol";
+import "./interfaces/IERC20Burnable.sol";
 import "./interfaces/IFusdNFT.sol";
 import "./Vault.sol";
 import "./interfaces/IVault.sol";
 
-contract Reactor is ReentrancyGuardUpgradeable, Initializable {
-    using SafeERC20Upgradeable for IERC20;
-    using SafeERC20Upgradeable for IERC20BurnableUpgradeable;
+contract Reactor is ReentrancyGuard {
+    using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20Burnable;
 
     struct FUSDInfo {
         uint256 balance;
         uint256 amount;
     }
 
-    address immutable public FUSD_NFT;
     IFusdNFT fusdNFT;
     address immutable public collateral;
     address immutable oracleAddress;
-    uint256 durationForMaturity;
+    uint256 constant durationForMaturity = 94608000;
+    uint constant public decimals = 18;
     address immutable fusdERC20;
 
-    function constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20) {
+    constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20) {
         collateral = _collateral;
         oracleAddress = _oracle;
         fusdNFT = IFusdNFT(address(_fusdNFT));
-        fusdERC20 = _fusdERC20
+        fusdERC20 = _fusdERC20;
     }
 
     function borrow(uint256 amount)
         external
         nonReentrant
-        returns (bool)
+        returns (uint256)
     {
         uint256 forgePrice = uint256(
             priceFromOracle(oracleAddress)
@@ -46,7 +46,7 @@ contract Reactor is ReentrancyGuardUpgradeable, Initializable {
 
         //move the funds to a vault to keep funds segregated
         address vaultCollateral = generateVault();
-        IERC20(address(collateralAddress)).safeTransferFrom(
+        IERC20(address(collateral)).safeTransferFrom(
             msg.sender,
             vaultCollateral,
             amount
@@ -56,13 +56,10 @@ contract Reactor is ReentrancyGuardUpgradeable, Initializable {
 
         uint256 tokenId = mintFUSDNFT(
             amount,
-            0,
             forgePrice,
-            durationForMaturity,
-            vaultCollateral,
-            decimals
+            vaultCollateral
         );
-        return true;
+        return tokenId;
     }
 
     function generateVault() internal returns (address) {
@@ -78,10 +75,8 @@ contract Reactor is ReentrancyGuardUpgradeable, Initializable {
 
     function mintFUSDNFT(
         uint256 amount,
-        Ratios ratioOfSteady,
         uint256 forgePrice,
-        address fusdVault,
-        uint decimals
+        address fusdVault
     ) internal returns (uint256 tokenId) {
         tokenId = fusdNFT.safeMint(
             msg.sender,
@@ -113,7 +108,7 @@ contract Reactor is ReentrancyGuardUpgradeable, Initializable {
 
         require(_fusd.amount <= _fusd.balance, "Need more Steady");
         uint256 fusdAmount = IVault(fusdVault)
-            .getBalance(collateralAddress);
+            .getBalance(collateral);
         address[] memory beneficiaries = new address[](2);
         uint256[] memory beneficiaryAmounts = new uint256[](2);
         beneficiaries[0] = borrower;
@@ -131,11 +126,11 @@ contract Reactor is ReentrancyGuardUpgradeable, Initializable {
                 100;
             beneficiaries[1] = msg.sender;
             beneficiaryAmounts[1] =
-                (fusdAmount * 80)) /
+                (fusdAmount * 80) /
                 100;
         }
         IVault(fusdVault).mergeAndClose(
-            IERC20(collateralAddress),
+            IERC20(collateral),
             beneficiaries,
             beneficiaryAmounts
         );

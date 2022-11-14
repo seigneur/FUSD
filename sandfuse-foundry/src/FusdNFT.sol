@@ -1,24 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
-import "openzeppelin-contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "openzeppelin-contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
-import "openzeppelin-contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "openzeppelin-contracts/token/ERC721/ERC721.sol";
+import "openzeppelin-contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "openzeppelin-contracts/utils/Counters.sol";
+import "openzeppelin-contracts/access/AccessControl.sol";
 
-contract FusdNFT is ERC721Upgradeable, ERC721BurnableUpgradeable, AccessControlUpgradeable {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
+contract FusdNFT is ERC721, ERC721Burnable, AccessControl {
+    using Counters for Counters.Counter;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    CountersUpgradeable.Counter public tokenIdCounter;
+    Counters.Counter public tokenIdCounter;
 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-    constructor(
-        string memory name_,
-        string memory symbol_
+    constructor(string memory name_,
+        string memory symbol_) 
+        ERC721(name_, 
+        symbol_
     ) {
-        __ERC721_init(name_,symbol_);
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MINTER_ROLE, msg.sender);
     }
@@ -27,7 +27,7 @@ contract FusdNFT is ERC721Upgradeable, ERC721BurnableUpgradeable, AccessControlU
         public
         view
         virtual
-        override(ERC721Upgradeable, AccessControlUpgradeable)
+        override(ERC721, AccessControl)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -41,7 +41,7 @@ contract FusdNFT is ERC721Upgradeable, ERC721BurnableUpgradeable, AccessControlU
         _safeMint(_to, tokenId);
     }
 
-    function burn(uint256 tokenId) public override(ERC721BurnableUpgradeable) {
+    function burn(uint256 tokenId) public override(ERC721Burnable) {
         super.burn(tokenId);
     }
     
