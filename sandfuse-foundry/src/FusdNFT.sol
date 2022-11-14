@@ -44,4 +44,8 @@ contract FusdNFT is ERC721Upgradeable, ERC721BurnableUpgradeable, AccessControlU
     function burn(uint256 tokenId) public override(ERC721BurnableUpgradeable) {
         super.burn(tokenId);
     }
+    
+    function getCurrentTokenId() public view returns (uint256) {
+        return tokenIdCounter.current();
+    }
 }

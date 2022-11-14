@@ -5,7 +5,6 @@ import "openzeppelin-contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract Vault is OwnableUpgradeable {
-
   function mergeAndClose(IERC20Upgradeable token, address[] memory payTo,uint[] memory amounts) public onlyOwner {
     require(payTo.length == amounts.length, "Mismatch in allocation");
     for(uint i = 0; i < payTo.length;) {
