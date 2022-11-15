@@ -15,6 +15,6 @@ contract DummyPoR {
       uint256 updatedAt,
       uint80 answeredInRound
     ){
-      return (0, 100000000000000000000, block.number, 100, 0);
+      return (0, 1000000000*(10**18), block.number, 100, 0);
     }
 }
