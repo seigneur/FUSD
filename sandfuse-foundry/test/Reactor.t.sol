@@ -67,7 +67,6 @@ contract ReactorTest is Test {
         oracle.setLatestPrice(int256(1000*10**18));//set BTC price to 1000 USD
         oracle.setLatestAnswer(int256(1000*10**18));//set BTC price to 1000 USD
         vm.stopPrank();
-        // vm.prank(owner);
     }
 }
 
@@ -95,11 +94,25 @@ contract ReactorBorrowFlowTest is ReactorTest {
         //do approval of transfer and then call the contract
         WBTC.approve(address(reactor),100*10**18);
         reactor.borrow{value:0.1 ether}(100*10**18);
-        // reactor.borrow(100*10**18);
+        assertTrue(true);
+
         vm.stopPrank();
     }
 
     function testCloseBorrow() public {
+
+        vm.startPrank(borrower);
+        //do approval of transfer and then call the contract
+        WBTC.approve(address(reactor),100*10**18);
+        (uint tokenId) = reactor.borrow{value:0.1 ether}(100*10**18);
+        // check the balance
+        vm.roll(100);
+        fusd.approve(address(reactor),100*10**18);
+        nft.approve(address(reactor), tokenId);
+        reactor.repay(tokenId);
+        assertTrue(true);
+
+        vm.stopPrank();
 
     }
 
