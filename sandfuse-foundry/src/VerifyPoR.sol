@@ -3,7 +3,6 @@ pragma solidity ^0.8.16;
 
 import "./interfaces/AggregatorV3Interface.sol";
 import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-
 contract CLv1 {
     IERC20 public WBTC;
     AggregatorV3Interface public PoR_WBTC;

@@ -6,8 +6,10 @@ import "forge-std/console.sol";
 
 import "../src/Reactor.sol";
 import {ERC20PresetFixedSupply} from "../lib/openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
+import {IERC20} from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {FusedPoRUSD} from "../src/FUSD.sol";
 import {FUSDNFT} from "../src/FUSDNFT.sol";
+import {CLv1} from "../src/VerifyPoR.sol";
 import {Renderer} from "../src/Renderer.sol";
 import {DummyOracle} from "./DummyOracle.sol";
 import {DummyPoR} from "./DummyPoR.sol";
@@ -20,6 +22,7 @@ contract ReactorTest is Test {
     FUSDNFT public nft;
     Renderer public renderer;
     Reactor public reactor;
+    CLv1 public clv1;
 
     address public deployer;
     address public borrower;
@@ -37,12 +40,14 @@ contract ReactorTest is Test {
         deployer = vm.addr(1);
         borrower = vm.addr(2);
         treasury = vm.addr(3);
-
+        vm.deal(borrower, 1 ether);
         vm.startPrank(deployer);
         WBTC = new ERC20PresetFixedSupply("Wrapped Bitcoin", "WBTC", 100000*10**18, deployer);
         fusd = new FusedPoRUSD();
         oracle = new DummyOracle();
         por = new DummyPoR();
+        clv1 = new CLv1();
+        clv1.setup(IERC20(WBTC),por);
         renderer = new Renderer(); 
         nft = new FUSDNFT(         
                             "FUSD NFT's",
@@ -52,15 +57,15 @@ contract ReactorTest is Test {
                             address(renderer)
                         );
         reactor = new Reactor(
-            address(WBTC), address(nft), address(oracle), address(fusd), address(por), address(treasury)
+            address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(treasury)
         );
         // minter roles need to be assigned to the reactor
         nft.grantRole(MINTER_ROLE, address(reactor));
         fusd.grantRole(MINTER_ROLE, address(reactor));
-        
         //transfer 100 BTC to borrower
         WBTC.transfer(address(borrower), 100*10**decimals);
-        oracle.setLatestPrice(int256(1000*10**decimals));//set BTC price to 1000 USD
+        oracle.setLatestPrice(int256(1000*10**18));//set BTC price to 1000 USD
+        oracle.setLatestAnswer(int256(1000*10**18));//set BTC price to 1000 USD
         vm.stopPrank();
         // vm.prank(owner);
     }
@@ -70,8 +75,8 @@ contract ReactorDeployment is ReactorTest {
 
     function testDeployment() public {
       // test that the price oracles work
-        setUp();
-        assertEq(uint256(oracle.getLatestPrice()), 1000*10**decimals);
+        // setUp();
+        assertEq(uint256(oracle.getLatestPrice()), 1000*10**18);
         assertEq(WBTC.balanceOf(borrower), 100*10**decimals);
         assertTrue(true);
     }
@@ -83,15 +88,18 @@ contract ReactorDeployment is ReactorTest {
 contract ReactorBorrowFlowTest is ReactorTest {
     //tests the creation of a borrow request considering that the feeds are available
     function testCreateBorrow() public {
-        setUp();
+        // setUp();
         // emit log_uint(block.number); // 1
 
         vm.startPrank(borrower);
+        //do approval of transfer and then call the contract
+        WBTC.approve(address(reactor),100*10**18);
+        reactor.borrow{value:0.1 ether}(100*10**18);
+        // reactor.borrow(100*10**18);
         vm.stopPrank();
     }
 
     function testCloseBorrow() public {
-        setUp();
 
     }
 

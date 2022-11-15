@@ -6,6 +6,7 @@ import "./interfaces/IERC20Burnable.sol";
 import "./interfaces/IFusdNFT.sol";
 import "./Vault.sol";
 import "./interfaces/IVerifyPoR.sol";
+import "forge-std/console.sol";
 
 contract Reactor is ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -47,7 +48,7 @@ contract Reactor is ReentrancyGuard {
         uint256 fusePrice = uint256(
             priceFromOracle(oracleAddress)
         );
-        //allow to borrow 80% Value
+        // allow to borrow 80% Value
         uint256 fusdAmt = ((amount *
             80 * 
             uint256(fusePrice)) / (100 * (10**decimals * 10**decimals))) *
@@ -156,7 +157,7 @@ contract Reactor is ReentrancyGuard {
         (, bytes memory returnData) = address(_priceOracle).staticcall(payload);
         (price) = abi.decode(returnData, (int256));
         require(
-            price >= 1 && price <= 1000000000000000000000000000000,
+            price >= 1 && price <= 1000000000000 * 10 ** 18,
             "Oracle price is out of range"
         );
     }

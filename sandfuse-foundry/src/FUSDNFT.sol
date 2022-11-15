@@ -146,7 +146,7 @@ contract FUSDNFT is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
         (, bytes memory returnData) = address(ORACLE).staticcall(payload);
         (price) = abi.decode(returnData, (int256));
         require(
-            price >= 1 && price <= 1000000000000000000000000000000,
+            price >= 1 && price <= 1000000000000 * 10 ** 18,
             "Oracle price is out of range"
         );
     }
