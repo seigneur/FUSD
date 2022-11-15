@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 
 import "./interfaces/AggregatorV3Interface.sol";
-import "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract CLv1 {
     IERC20 public WBTC;
@@ -17,7 +17,7 @@ contract CLv1 {
         PoR_WBTC = _porWBTC;
     }
 
-    function checkLatestRoundDataPoRCGT()
+    function checkLatestRoundDataPoR()
         public
         view
         returns (
@@ -33,7 +33,7 @@ contract CLv1 {
     }
 
     function verifyPoRCGT() external view returns (bool result) {
-        (, int256 reserveProof, , , ) = checkLatestRoundDataPoRCGT();
+        (, int256 reserveProof, , , ) = checkLatestRoundDataPoR();
         if (reserveProof >= int256(WBTC.totalSupply())) {
             return result = true;
         }

@@ -5,7 +5,7 @@ import './SVG.sol';
 import './Utils.sol';
 
 contract Renderer {
-    function render(uint256 _tokenId, int256 _value) public pure returns (string memory) {
+    function render(uint256 _tokenId, uint256 _value) public pure returns (string memory) {
         return
             string.concat(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">',
@@ -38,7 +38,7 @@ contract Renderer {
                     ),
                     string.concat(
                         svg.cdata('Your, current value - '),
-                        utils.uint2str(_value)
+                        utils.uint2str(uint256(_value))
                     )
                 ),
                 //the progress bar
@@ -66,10 +66,5 @@ contract Renderer {
                 '</svg>'
             );
     }
-
-    function example() external pure returns (string memory) {
-        return render(1);
-    }
-    
     
 }
