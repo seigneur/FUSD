@@ -24,13 +24,12 @@ contract Reactor is ReentrancyGuard {
     mapping(uint => int) public tokenIdPrices;
     uint public tokenLast;
 
-    constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20, address _por, address _treasury) {
+    constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20, address _por) {
         PoR = _por;
         collateral = _collateral;
         oracleAddress = _oracle;
         fusdNFT = IFusdNFT(address(_fusdNFT));
         fusdERC20 = _fusdERC20;
-        TREASURY = _treasury;
     }
 
     function borrow(uint256 amount)
@@ -41,7 +40,7 @@ contract Reactor is ReentrancyGuard {
     {
         require(IVerifyPoR(PoR).verifyPoRCGT(), "Not enough reserves");
         require(msg.value >= 0.001 ether, "Insufficient fees to borrow!");
-        payable(TREASURY).transfer(0.0008 ether);// move to treasury to fund the lending side
+        payable(address(this)).transfer(0.0008 ether); // move to staking pool contract address to fund the lending side
         block.coinbase.transfer(0.0002 ether);// pay the community, later change this to only if solo staker
         uint256 fusePrice = uint256(
             priceFromOracle(oracleAddress)
@@ -110,17 +109,9 @@ contract Reactor is ReentrancyGuard {
             fusePrice,
             fusdVault
         ) = fusdNFT.getFUSD(tokenId);
-        // _fusd.balance = IERC20Burnable(address(fusdERC20)).balanceOf(
-        //     msg.sender
-        // );
-
-        // require(_fusd.amount <= _fusd.balance, "Need more FUSD");
         
         address sendToAddress = borrower;
-        uint256 sendToAmount = collateralAmount;
-
         //Has the price decreased by 20% of initial value
-        
         int256 maxPriceDecrease =  int256(fusePrice) - ((int256(fusePrice) * 2000) / 10_000);
         
         uint256 fusdAmt = ((collateralAmount *
@@ -145,7 +136,6 @@ contract Reactor is ReentrancyGuard {
             //TODO: Club into one txn to swap n uniswap
             //TODO: How to handle mass liquidations
             sendToAddress = address(this); 
-            sendToAmount = collateralAmount;
             Vault(fusdVault).mergeAndClose(
                 IERC20(collateral),
                 sendToAddress
