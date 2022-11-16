@@ -43,22 +43,22 @@ contract ReactorTest is Test {
         vm.deal(borrower, 1 ether);
         vm.startPrank(deployer);
         WBTC = new ERC20PresetFixedSupply("Wrapped Bitcoin", "WBTC", 100000*10**18, deployer);
-        fusd = new FusedPoRUSD();
+        fusd = new FusedPoRUSD(); //need to deploy
         oracle = new DummyOracle();
         por = new DummyPoR();
-        clv1 = new CLv1();
-        clv1.setup(IERC20(WBTC),por);
-        renderer = new Renderer(); 
+        clv1 = new CLv1(); //need to deploy
+        clv1.setup(IERC20(WBTC),por); //need to call
+        renderer = new Renderer(); //need to deploy
         nft = new FUSDNFT(         
                             "FUSD NFT's",
                             "FUSDPORNFTS",
                             address(treasury),
                             address(oracle),
                             address(renderer)
-                        );
+                        );//to deploy
         reactor = new Reactor(
             address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(treasury)
-        );
+        );//to deploy
         // minter roles need to be assigned to the reactor
         nft.grantRole(MINTER_ROLE, address(reactor));
         fusd.grantRole(MINTER_ROLE, address(reactor));
