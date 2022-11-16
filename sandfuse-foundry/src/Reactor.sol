@@ -11,12 +11,7 @@ import "forge-std/console.sol";
 contract Reactor is ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeERC20 for IERC20Burnable;
-
-    struct FUSDInfo {
-        uint256 balance;
-        uint256 amount;
-    }
-
+    
     IFusdNFT fusdNFT;
     address immutable public collateral;
     address immutable public oracleAddress;
@@ -25,6 +20,9 @@ contract Reactor is ReentrancyGuard {
     address immutable fusdERC20;
     uint256 constant durationForMaturity = 94608000;
     uint constant public decimals = 18;
+
+    mapping(uint => int) public tokenIdPrices;
+    uint public tokenLast;
 
     constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20, address _por, address _treasury) {
         PoR = _por;
@@ -48,9 +46,9 @@ contract Reactor is ReentrancyGuard {
         uint256 fusePrice = uint256(
             priceFromOracle(oracleAddress)
         );
-        // allow to borrow 80% Value
+        // allow to borrow 75% Value
         uint256 fusdAmt = ((amount *
-            80 * 
+            75 * 
             uint256(fusePrice)) / (100 * (10**decimals * 10**decimals))) *
             (10**decimals);
 
@@ -69,6 +67,9 @@ contract Reactor is ReentrancyGuard {
             fusePrice,
             vaultCollateral
         );
+        int256 maxPriceDecrease =  int256(fusePrice) - ((int256(fusePrice) * 2000) / 10_000);
+        tokenIdPrices[tokenId] = maxPriceDecrease;
+        tokenLast = tokenId;
         return tokenId;
     }
 
@@ -99,49 +100,62 @@ contract Reactor is ReentrancyGuard {
     }
 
     function repay(uint256 tokenId) external nonReentrant returns (bool) {
-        FUSDInfo memory _fusd;
+        uint256 collateralAmount;
         uint256 fusePrice;
         address fusdVault;
         address borrower; 
         (   
             borrower,
-            _fusd.amount,
+            collateralAmount,// this should be converted to the amount of FUSD that is currently required
             fusePrice,
             fusdVault
         ) = fusdNFT.getFUSD(tokenId);
-        _fusd.balance = IERC20Burnable(address(fusdERC20)).balanceOf(
-            msg.sender
-        );
+        // _fusd.balance = IERC20Burnable(address(fusdERC20)).balanceOf(
+        //     msg.sender
+        // );
 
-        require(_fusd.amount <= _fusd.balance, "Need more FUSD");
+        // require(_fusd.amount <= _fusd.balance, "Need more FUSD");
         
-        uint256 collateralAmount = Vault(fusdVault).getBalance(collateral);
         address sendToAddress = borrower;
         uint256 sendToAmount = collateralAmount;
 
-        //Has the price decreased by 25% of initial value
-        int256 maxPriceDecrease =  int256(fusePrice) - ((int256(fusePrice) * 2500) / 10_000);
+        //Has the price decreased by 20% of initial value
+        
+        int256 maxPriceDecrease =  int256(fusePrice) - ((int256(fusePrice) * 2000) / 10_000);
+        
+        uint256 fusdAmt = ((collateralAmount *
+                            75 * 
+                            uint256(fusePrice)) / (100 * (10**decimals * 10**decimals))) *
+                            (10**decimals);
         // if the borrower is above water do not let other's liquidate position
-        if (priceFromOracle(oracleAddress) - maxPriceDecrease >= 0) {
+        if (priceFromOracle(oracleAddress) >= maxPriceDecrease) {
             require(
                 borrower == msg.sender,
                 "You need to be the borrower!"
             );
+            Vault(fusdVault).mergeAndClose(
+                IERC20(collateral),
+                sendToAddress
+            );
+   
+            //transfer the FUSD amount from the borrower to this contract
+            IERC20Burnable(address(fusdERC20)).transferFrom(borrower, address(this), fusdAmt);
         } else {
             //assuming that the msg.sender/liquidator was funded by the treasury
             //TODO: Club into one txn to swap n uniswap
             //TODO: How to handle mass liquidations
-            sendToAddress = TREASURY; 
+            sendToAddress = address(this); 
             sendToAmount = collateralAmount;
+            Vault(fusdVault).mergeAndClose(
+                IERC20(collateral),
+                sendToAddress
+            );
+            //swap collateral
         }
-        Vault(fusdVault).mergeAndClose(
-            IERC20(collateral),
-            sendToAddress
-        );
 
         IERC20Burnable(address(fusdERC20)).burnFrom(
-            msg.sender,
-            _fusd.amount
+            sendToAddress,
+            fusdAmt
         );
         fusdNFT.burn(tokenId);
         return true;
