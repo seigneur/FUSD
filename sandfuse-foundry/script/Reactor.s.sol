@@ -19,7 +19,7 @@ contract DeployReactor is Script {
     CLv1 public clv1;
 
     address por = 0xDe9C980F79b636B46b9c3bc04cfCC94A29D18D19; //swell PoR feed
-    address oracle = 0x7b219F57a8e9C7303204Af681e9fA69d17ef626f;// price feed - XAU/USD
+    address oracle = 0x7b219F57a8e9C7303204Af681e9fA69d17ef626f; // price feed - XAU/USD
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -42,7 +42,11 @@ contract DeployReactor is Script {
         //     address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(msg.sender)
         // );
         reactor = new Reactor(
-            address(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290), address(0x570A528a6972060c5AA202fcd2a2915300831bcB), address(oracle), address(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4), address(0x090AEeB45E7E6c5587BDBe17Ef3633ef103C949C), address(msg.sender)
+            address(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290), 
+            address(0x570A528a6972060c5AA202fcd2a2915300831bcB), 
+            address(oracle), 
+            address(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4), 
+            address(0x090AEeB45E7E6c5587BDBe17Ef3633ef103C949C)
         );
         vm.stopBroadcast();
     }

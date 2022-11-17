@@ -57,7 +57,7 @@ contract ReactorTest is Test {
                             address(renderer)
                         );//to deploy
         reactor = new Reactor(
-            address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(treasury)
+            address(WBTC), address(nft), address(oracle), address(fusd), address(clv1)/*, address(treasury)*/
         );//to deploy
         // minter roles need to be assigned to the reactor
         nft.grantRole(MINTER_ROLE, address(reactor));

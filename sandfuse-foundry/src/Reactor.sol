@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
+
 import "openzeppelin-contracts/security/ReentrancyGuard.sol";
 import "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IERC20Burnable.sol";
@@ -16,7 +17,7 @@ contract Reactor is ReentrancyGuard {
     address immutable public collateral;
     address immutable public oracleAddress;
     address immutable public PoR;
-    address immutable public TREASURY;
+    // address immutable public TREASURY;
     address immutable fusdERC20;
     uint256 constant durationForMaturity = 94608000;
     uint constant public decimals = 18;
@@ -24,7 +25,13 @@ contract Reactor is ReentrancyGuard {
     mapping(uint => int) public tokenIdPrices;
     uint public tokenLast;
 
-    constructor(address _collateral, address _fusdNFT, address _oracle, address _fusdERC20, address _por) {
+    constructor(
+        address _collateral, 
+        address _fusdNFT, 
+        address _oracle, 
+        address _fusdERC20, 
+        address _por
+    ) {
         PoR = _por;
         collateral = _collateral;
         oracleAddress = _oracle;
