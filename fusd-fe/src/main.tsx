@@ -20,7 +20,7 @@ const { chains, provider, webSocketProvider } = configureChains(
         return { http: chain.rpcUrls.default }
       },
     }),
-    alchemyProvider({ apiKey: '' })
+    alchemyProvider({ apiKey: 'KSMix3DFlS4-Mk34sK1AJGEllu5NYx-F' })
   ]
 )
 

@@ -11,6 +11,8 @@ import "../src/VerifyPoR.sol";
 import "../src/Reactor.sol";
 
 contract DeployReactor is Script {
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
     ERC20PresetFixedSupply WBTC;
 
     FUSDNFT public nft;
@@ -41,13 +43,15 @@ contract DeployReactor is Script {
         // reactor = new Reactor(
         //     address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(msg.sender)
         // );
-        reactor = new Reactor(
-            address(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290), 
-            address(0x570A528a6972060c5AA202fcd2a2915300831bcB), 
-            address(oracle), 
-            address(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4), 
-            address(0x090AEeB45E7E6c5587BDBe17Ef3633ef103C949C)
-        );
+        // reactor = new Reactor(
+        //     address(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290), 
+        //     address(0x570A528a6972060c5AA202fcd2a2915300831bcB), 
+        //     address(oracle), 
+        //     address(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4), 
+        //     address(0x090AEeB45E7E6c5587BDBe17Ef3633ef103C949C)
+        // );
+        FUSDNFT(0x570A528a6972060c5AA202fcd2a2915300831bcB).grantRole(MINTER_ROLE, address(0x06d5bBd6FD6D8e56362e7866D2bc16b2200c3907));
+        FusedPoRUSD(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4).grantRole(MINTER_ROLE, address(0x06d5bBd6FD6D8e56362e7866D2bc16b2200c3907));
         vm.stopBroadcast();
     }
 }
