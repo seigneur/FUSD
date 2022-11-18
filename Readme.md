@@ -1,5 +1,6 @@
 ## Sandfuse Lending
 ![Design](./assets/fuse-logo.png "")
+![Design](./assets/FUSD-logos_black.png "")
 
 We intend to create a P2P lending platform on chain. The general design idea is as follows - 
 ![Design](./assets/fuse.png?raw=true "Design")

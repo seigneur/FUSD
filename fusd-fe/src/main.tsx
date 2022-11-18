@@ -50,7 +50,7 @@ const client = createClient({
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <WagmiConfig client={client}>
-    <Theme dataTheme="valentine">
+    <Theme dataTheme="retro">
       <App />
     </Theme>
     </WagmiConfig>

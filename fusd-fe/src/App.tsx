@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   Collapse,
+  Divider,
   Input,
   Navbar,
   Select,
@@ -17,10 +18,8 @@ console.log(porabi)
 import { Profile } from "./components/Profile";
 import ErrorBoundary from './components/ErrorBoundary';
 import { Borrow } from './components/Borrow';
-import { Repay } from './components/Repay';
 import { ApproveBorrow } from './components/ApproveBorrow';
-import { ApproveRepayFUSD } from './components/ApproveRepayFUSD';
-import { ApproveRepayNFT } from './components/ApproveRepayNFT';
+
 import { FUSDNFT } from './components/FUSDNFT';
 import { useAccount, useBalance, useContractRead, useNetwork } from "wagmi";
 import { ethers } from "ethers";
@@ -181,24 +180,27 @@ function App() {
                   </Card.Body>
                 </Card>
               </div>
-
+                    <Divider></Divider>
+                    <h2>List of Loan Positions Presented as Dynamic NFT's</h2>
               <div className="h-2 w-auto"></div>
               <div className="item w-auto h-auto">
-                <Collapse icon="arrow">
+                {/* <Collapse icon="arrow">
                   <Collapse.Title className="text-xl font-medium">
                     Your loan NFT's that can be closed
                   </Collapse.Title>
-                  <Collapse.Content>
+                  <Collapse.Content> */}
                   <div className="grid grid-flow-col auto-cols-max">
-                    <div><FUSDNFT  tokenId={"0"} value={amountValue.toString()} /></div>
+                    <div><FUSDNFT  tokenId={"0"} value={"17610"} /></div>
+                    <div><FUSDNFT  tokenId={"1"} value={"100"} /></div>
+                    <div><FUSDNFT  tokenId={"2"} value={"100"} /></div>
                     {/* <div><FUSDNFT  tokenId={"1"} value={amountValue.toString()} /></div> */}
                     {/* <div><FUSDNFT /></div>
                     <div><FUSDNFT /></div>
                     <div><FUSDNFT /></div> */}
                     
                   </div>
-                  </Collapse.Content>
-                </Collapse>
+                  {/* </Collapse.Content>
+                </Collapse> */}
               </div>
             </div>
           </div>

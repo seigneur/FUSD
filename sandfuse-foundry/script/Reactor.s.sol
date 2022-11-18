@@ -33,16 +33,17 @@ contract DeployReactor is Script {
         WBTC = ERC20PresetFixedSupply(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290);
         
         // clv1 = new CLv1();
-        clv1 = CLv1(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4);
+        clv1 = CLv1(0x69B3C6038E5Da2d1e6B1CAa014031629f4A0C532);
         // clv1.setup(IERC20(WBTC),AggregatorV3Interface(por));
         // renderer = new Renderer();
-        renderer = Renderer(0xb9e0bd4d179023ea87ae524bd21b981938c35156);
-        nft = new FUSDNFT(         
-                            "FUSDNFTs",
-                            "FUSDPORNFTS",
-                            address(oracle),
-                            address(renderer)
-                        );//to deploy
+        renderer = Renderer(0xb9E0bD4d179023Ea87AE524bd21b981938C35156);
+        // nft = new FUSDNFT(         
+        //                     "FUSDNFTs",
+        //                     "FUSDPORNFTS",
+        //                     address(oracle),
+        //                     address(renderer)
+        //                 );//to deploy
+        nft = FUSDNFT(0x1978D1c4476d8f0c65d1942ED7DBeccE9f4c28a6);
         // reactor = new Reactor(
         //     address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(msg.sender)
         // );
@@ -53,8 +54,14 @@ contract DeployReactor is Script {
         //     address(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4), 
         //     address(0x090AEeB45E7E6c5587BDBe17Ef3633ef103C949C)
         // );
-        // FUSDNFT(0x570A528a6972060c5AA202fcd2a2915300831bcB).grantRole(MINTER_ROLE, address(0x06d5bBd6FD6D8e56362e7866D2bc16b2200c3907));
-        // FusedPoRUSD(0x570A528a6972060c5AA202fcd2a2915300831bcB).grantRole(MINTER_ROLE, address(0x06d5bBd6FD6D8e56362e7866D2bc16b2200c3907));
+        // reactor - Reactor(0x01edB5047E4617f1926f22FC7133c7b0515B39E0);
+        // FUSDNFT(address(nft)).grantRole(MINTER_ROLE, address(reactor));
+        // FusedPoRUSD(address(fusd)).grantRole(MINTER_ROLE, address(reactor));
+        reactor = Reactor(0x0bb52A89CDDa9D67f3CD1C0ee47e8F722f7812a5);
+        FUSDNFT(address(nft)).grantRole(MINTER_ROLE, address(0x0bb52A89CDDa9D67f3CD1C0ee47e8F722f7812a5));
+        FusedPoRUSD(address(fusd)).grantRole(MINTER_ROLE, address(0x0bb52A89CDDa9D67f3CD1C0ee47e8F722f7812a5));
+        WBTC.approve(address(0x0bb52A89CDDa9D67f3CD1C0ee47e8F722f7812a5),10*10**18);
+        reactor.borrow{value:0.001 ether}(10*10**18);
         // FusedPoRUSD(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4).mint(address(0xd76B6BED411f7Ef187Df457382d7bF588Ed8772B), 10000000000 * 10**18);
         vm.stopBroadcast();
     }
