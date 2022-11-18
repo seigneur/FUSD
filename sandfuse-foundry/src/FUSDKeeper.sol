@@ -58,13 +58,15 @@ contract KeepersCounter is KeeperCompatibleInterface, Ownable {
         require(success);
         uint tokenLast = abi.decode(returnData, (uint));
 
-        payload = abi.encodeWithSignature("tokenIdPrices(uint)", tokenLast);
-        (success, returnData) = address(reactor).staticcall(payload);
-        require(success);
-        int maxPriceDecrease = abi.decode(returnData, (int));
-
-        upkeepNeeded = priceFromOracle() < maxPriceDecrease;
-        performData = abi.encode(tokenLast);
+        for (uint i=0; i<=tokenLast; ++i) {
+            payload = abi.encodeWithSignature("tokenIdPrices(uint)", tokenLast);
+            (success, returnData) = address(reactor).staticcall(payload);
+            if (success) {
+                int maxPriceDecrease = abi.decode(returnData, (int));
+                upkeepNeeded = priceFromOracle() < maxPriceDecrease;
+                performData = abi.encode(tokenLast);
+            }
+        }
     }
 
     function performUpkeep(
