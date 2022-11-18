@@ -26,7 +26,7 @@ contract ReactorTest is Test {
 
     address public deployer;
     address public borrower;
-    address public treasury;
+    address public stakingContractAddress;
     uint constant decimals = 18;
 
     function setUp() public {
@@ -39,7 +39,7 @@ contract ReactorTest is Test {
 
         deployer = vm.addr(1);
         borrower = vm.addr(2);
-        treasury = vm.addr(3);
+        stakingContractAddress = vm.addr(3);
         vm.deal(borrower, 1 ether);
         vm.startPrank(deployer);
         WBTC = new ERC20PresetFixedSupply("Wrapped Bitcoin", "WBTC", 100000*10**18, deployer);
@@ -52,12 +52,11 @@ contract ReactorTest is Test {
         nft = new FUSDNFT(         
                             "FUSD NFT's",
                             "FUSDPORNFTS",
-                            address(treasury),
                             address(oracle),
                             address(renderer)
                         );//to deploy
         reactor = new Reactor(
-            address(WBTC), address(nft), address(oracle), address(fusd), address(clv1)/*, address(treasury)*/
+            address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(stakingContractAddress)
         );//to deploy
         // minter roles need to be assigned to the reactor
         nft.grantRole(MINTER_ROLE, address(reactor));
@@ -91,9 +90,11 @@ contract ReactorBorrowFlowTest is ReactorTest {
         // emit log_uint(block.number); // 1
 
         vm.startPrank(borrower);
+        vm.roll(100);
+
         //do approval of transfer and then call the contract
         WBTC.approve(address(reactor),100*10**18);
-        reactor.borrow{value:0.1 ether}(100*10**18);
+        reactor.borrow{value:0.001 ether}(100*10**18);
         assertTrue(true);
 
         vm.stopPrank();
@@ -107,11 +108,12 @@ contract ReactorBorrowFlowTest is ReactorTest {
         (uint tokenId) = reactor.borrow{value:0.1 ether}(100*10**18);
         // check the balance
         vm.roll(100);
-        fusd.approve(address(reactor),100*10**18);
+        fusd.approve(address(reactor),75000000000000000000000);
         nft.approve(address(reactor), tokenId);
         reactor.repay(tokenId);
         assertTrue(true);
 
+        
         vm.stopPrank();
 
     }

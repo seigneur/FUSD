@@ -13,7 +13,6 @@ contract FUSDNFT is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
     using Counters for Counters.Counter;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter public tokenIdCounter;
-    address public immutable TREASURY;
     address public immutable ORACLE;
     address public renderer; //TODO define setters
     struct Fused {
@@ -31,11 +30,9 @@ contract FUSDNFT is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
     constructor(
         string memory name_,
         string memory symbol_,
-        address _treasury,
         address _priceOracle,
         address _renderer
     ) ERC721(name_, symbol_) {
-        TREASURY = _treasury;
         ORACLE = _priceOracle;
         renderer = _renderer;
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -116,6 +113,7 @@ contract FUSDNFT is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
         string
             memory description = "The collateral of the borrow position on FUSD represented as a NFT";
         uint256 value = uint256(priceFromOracle()) * currentElement.amount;
+        value = value / 10**18;
         return
             string(
                 abi.encodePacked(
@@ -139,6 +137,10 @@ contract FUSDNFT is ERC721, ERC721URIStorage, ERC721Burnable, AccessControl {
                     )
                 )
             );
+    }
+
+    function setRenderer(address _renderer) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        renderer = _renderer;
     }
 
     function priceFromOracle() public view returns (int256 price) {

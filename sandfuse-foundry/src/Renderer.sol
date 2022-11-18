@@ -3,10 +3,18 @@ pragma solidity ^0.8.16;
 
 import './SVG.sol';
 import './Utils.sol';
+import "openzeppelin-contracts/utils/Base64.sol";
+
 
 contract Renderer {
     function render(uint256 _tokenId, uint256 _value) public pure returns (string memory) {
         return
+
+        string(
+                
+                    Base64.encode(
+                        bytes(
+                            abi.encodePacked(
             string.concat(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">',
                 svg.path(
@@ -37,7 +45,7 @@ contract Renderer {
                         svg.prop('fill', 'green')
                     ),
                     string.concat(
-                        svg.cdata('Your, current value - '),
+                        svg.cdata(''),
                         utils.uint2str(uint256(_value))
                     )
                 ),
@@ -64,7 +72,12 @@ contract Renderer {
                 
                
                 '</svg>'
-            );
+                            )
+                            )
+                            )
+                            )
+                            
+        );
     }
     
 }

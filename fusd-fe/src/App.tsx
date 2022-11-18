@@ -17,10 +17,14 @@ console.log(porabi)
 import { Profile } from "./components/Profile";
 import ErrorBoundary from './components/ErrorBoundary';
 import { Borrow } from './components/Borrow';
+import { Repay } from './components/Repay';
 import { ApproveBorrow } from './components/ApproveBorrow';
+import { ApproveRepayFUSD } from './components/ApproveRepayFUSD';
+import { ApproveRepayNFT } from './components/ApproveRepayNFT';
 import { FUSDNFT } from './components/FUSDNFT';
 import { useAccount, useBalance, useContractRead, useNetwork } from "wagmi";
 import { ethers } from "ethers";
+import configData from "../src/assets/contracts.json";
 
 function App() {
   const { address, isConnected } = useAccount()
@@ -28,46 +32,20 @@ function App() {
   const { data, isError, isLoading } = useBalance({
     addressOrName: address,
     chainId: chain?.id,
-    token: '0x0d449521e0a92198D793669521786d32837BbF55',
+    token: `0x${configData.WBTC.substring(2)}`,//WBTC Balance
     onSuccess(data) {
       console.log('Success', data)
     },
   })
   const porData:any = useContractRead({
-    address: '0xDe9C980F79b636B46b9c3bc04cfCC94A29D18D19',
+    address: configData.POR,
     abi: porabi,
     functionName: 'latestAnswer',
     onSuccess(data) {
       console.log('Success', data)
     },
   })
-  const nftBal:any = useContractRead({
-    address: '0x570a528a6972060c5aa202fcd2a2915300831bcb',
-    abi:  [{
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
-        }
-      ],
-      "name": "balanceOf",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-     ],
-    functionName: 'balanceOf',
-    onSuccess(data) {
-      console.log('nftBal - ', data)
-    },
-  });
+  
   const [value, setValue] = useState("default");
   const [amountValue, setAmountValue] = useState("0");
 
@@ -100,7 +78,7 @@ function App() {
 
                   <Stats.Stat>
                     <Stats.Stat.Item variant="title">Proof Of Reserve</Stats.Stat.Item>
-                    {/* <Stats.Stat.Item variant="value">{ethers.utils.formatUnits(porData?.data,8)}</Stats.Stat.Item> */}
+                    <Stats.Stat.Item variant="value">{ethers.utils.formatUnits(porData?.data,18)}</Stats.Stat.Item>
                     <Stats.Stat.Item variant="desc">
                       ↗︎ 400 (22%)
                     </Stats.Stat.Item>
@@ -162,7 +140,7 @@ function App() {
                     </div>
                     <Card.Actions className="justify-end">
                     <Button color="primary">
-                        <ApproveBorrow amount={amountValue}/>
+                        <ApproveBorrow/>
                         </Button>
                       <Button color="primary">
                         <Borrow amount={amountValue}/>
@@ -212,10 +190,11 @@ function App() {
                   </Collapse.Title>
                   <Collapse.Content>
                   <div className="grid grid-flow-col auto-cols-max">
+                    <div><FUSDNFT  tokenId={"0"} value={amountValue.toString()} /></div>
+                    {/* <div><FUSDNFT  tokenId={"1"} value={amountValue.toString()} /></div> */}
+                    {/* <div><FUSDNFT /></div>
                     <div><FUSDNFT /></div>
-                    <div><FUSDNFT /></div>
-                    <div><FUSDNFT /></div>
-                    <div><FUSDNFT /></div>
+                    <div><FUSDNFT /></div> */}
                     
                   </div>
                   </Collapse.Content>

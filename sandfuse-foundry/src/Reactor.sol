@@ -17,7 +17,7 @@ contract Reactor is ReentrancyGuard {
     address immutable public collateral;
     address immutable public oracleAddress;
     address immutable public PoR;
-    // address immutable public TREASURY;
+    address immutable public stakingContractAddress;
     address immutable fusdERC20;
     uint256 constant durationForMaturity = 94608000;
     uint constant public decimals = 18;
@@ -30,13 +30,15 @@ contract Reactor is ReentrancyGuard {
         address _fusdNFT, 
         address _oracle, 
         address _fusdERC20, 
-        address _por
+        address _por,
+        address _stakingContractAddress
     ) {
         PoR = _por;
         collateral = _collateral;
         oracleAddress = _oracle;
         fusdNFT = IFusdNFT(address(_fusdNFT));
         fusdERC20 = _fusdERC20;
+        stakingContractAddress = _stakingContractAddress;
     }
 
     function borrow(uint256 amount)
@@ -46,9 +48,9 @@ contract Reactor is ReentrancyGuard {
         returns (uint256)
     {
         require(IVerifyPoR(PoR).verifyPoRCGT(), "Not enough reserves");
-        require(msg.value >= 0.001 ether, "Insufficient fees to borrow!");
-        payable(address(this)).transfer(0.0008 ether); // move to staking pool contract address to fund the lending side
-        block.coinbase.transfer(0.0002 ether);// pay the community, later change this to only if solo staker
+        require(msg.value >= 0.0001 ether, "Insufficient fees to borrow!");
+        payable(address(stakingContractAddress)).transfer(0.00008 ether); // move to staking pool contract address to fund the lending side
+        block.coinbase.transfer(0.00002 ether);// pay the community, later change this to only if solo staker
         uint256 fusePrice = uint256(
             priceFromOracle(oracleAddress)
         );
@@ -57,7 +59,6 @@ contract Reactor is ReentrancyGuard {
             75 * 
             uint256(fusePrice)) / (100 * (10**decimals * 10**decimals))) *
             (10**decimals);
-
         //move the funds to a vault to keep funds segregated
         address vaultCollateral = generateVault();
         IERC20(address(collateral)).safeTransferFrom(
@@ -135,9 +136,6 @@ contract Reactor is ReentrancyGuard {
                 IERC20(collateral),
                 sendToAddress
             );
-   
-            //transfer the FUSD amount from the borrower to this contract
-            IERC20Burnable(address(fusdERC20)).transferFrom(borrower, address(this), fusdAmt);
         } else {
             //assuming that the msg.sender/liquidator was funded by the treasury
             //TODO: Club into one txn to swap n uniswap
@@ -154,6 +152,7 @@ contract Reactor is ReentrancyGuard {
             sendToAddress,
             fusdAmt
         );
+        console.log("Token URI - %s", fusdNFT.tokenURI(tokenId));
         fusdNFT.burn(tokenId);
         return true;
     }

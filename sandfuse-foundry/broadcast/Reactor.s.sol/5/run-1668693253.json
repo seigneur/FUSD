@@ -1,0 +1,32 @@
+{
+  "transactions": [
+    {
+      "hash": "0xd35ff9605a92fd350fcbba7af5c0d5536844063a9beeec73384fe775ec90b887",
+      "transactionType": "CALL",
+      "contractName": null,
+      "contractAddress": "0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4",
+      "function": null,
+      "arguments": null,
+      "transaction": {
+        "type": "0x02",
+        "from": "0x0ce42e1adb575e72716933008d804d37d888a5b7",
+        "to": "0x4972c0d934d9b3cdac3911b5a2ef0a8d1d6ad6c4",
+        "gas": "0xc509",
+        "value": "0x0",
+        "data": "0x40c10f19000000000000000000000000d76b6bed411f7ef187df457382d7bf588ed8772b0000000000000000000000000000000000000000204fce5e3e25026110000000",
+        "nonce": "0x14",
+        "accessList": []
+      },
+      "additionalContracts": []
+    }
+  ],
+  "receipts": [],
+  "libraries": [],
+  "pending": [
+    "0xd35ff9605a92fd350fcbba7af5c0d5536844063a9beeec73384fe775ec90b887"
+  ],
+  "path": "/home/wizgot/projects/SandFuse/sandfuse-foundry/broadcast/Reactor.s.sol/5/run-latest.json",
+  "returns": {},
+  "timestamp": 1668693253,
+  "commit": "679308a"
+}
