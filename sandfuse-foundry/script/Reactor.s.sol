@@ -30,7 +30,7 @@ contract DeployReactor is Script {
         FusedPoRUSD fusd = new FusedPoRUSD();
         // FusedPoRUSD fusd = FusedPoRUSD(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4);
         //0x0782362bf0dec227799f17e7f9eca3a1fbb4a153
-        WBTC = new ERC20PresetFixedSupply("Fake CGT", "FCGT", 624487526014200, msg.sender);
+        WBTC = new ERC20PresetFixedSupply("Fake CGT", "FCGT", 125090948, msg.sender);
         // WBTC = ERC20PresetFixedSupply(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290);
         //0xb86223e00073c5fff76bc433a258ae4334f9d100
         clv1 = new CLv1();
