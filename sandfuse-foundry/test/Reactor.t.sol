@@ -54,7 +54,6 @@ contract ReactorTest is Test {
         nft = new FUSDNFT(         
                             "FUSD NFT's",
                             "FUSDPORNFTS",
-                            address(treasury),
                             address(oracle),
                             address(renderer)
                         );//to deploy

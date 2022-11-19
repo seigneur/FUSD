@@ -26,4 +26,4 @@ In a situation where the treasury via fees has enough funds to back FUSD, it may
 reserves are available an investor may choose to buy the collateral for price appreciation in the future. It can also be used for reinsurance purposes.
 
 ## Polygon deployment addresses
-https://polygonscan.com/address/0x4418e103b33f8cca4cfcfe3b83f83b4afeb543d5
+ https://polygonscan.com/address/0x12e1d4d4c151314149b8bff3fd6dff395524a115

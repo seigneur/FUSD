@@ -29,16 +29,16 @@ contract DeployReactor is Script {
 
         FusedPoRUSD fusd = new FusedPoRUSD();
         // FusedPoRUSD fusd = FusedPoRUSD(0x4972c0D934D9B3cDaC3911B5A2ef0a8d1D6aD6C4);
-        //0x0782362bf0dec227799f17e7f9eca3a1fbb4a153
+        //0xa05b424e984dec9bcf2750cdd26c05570020b8d4
         WBTC = new ERC20PresetFixedSupply("Fake CGT", "FCGT", 125090948, msg.sender);
         // WBTC = ERC20PresetFixedSupply(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290);
-        //0xb86223e00073c5fff76bc433a258ae4334f9d100
+        //0x459cd30ab35a74740ae27c3e0a015f38a78c5242
         clv1 = new CLv1();
         // clv1 = CLv1(0x69B3C6038E5Da2d1e6B1CAa014031629f4A0C532);
         clv1.setup(IERC20(WBTC),AggregatorV3Interface(por));
-        //0x0d449521e0a92198d793669521786d32837bbf55
+        //0x6918187ab5f7708662208f3d19275f0feb6427a7
         renderer = new Renderer();
-        //0xd781961768e2625b2aef0e654a21cb71ad2b3290
+        //0xbc0674fa9c6c9c9f9f4161e43c28ca4ce906b8ea
         // renderer = Renderer(0xb9E0bD4d179023Ea87AE524bd21b981938C35156);
         nft = new FUSDNFT(         
                             "FUSDNFTs",
@@ -47,11 +47,11 @@ contract DeployReactor is Script {
                             address(renderer)
                         );//to deploy
         // nft = FUSDNFT(0x1978D1c4476d8f0c65d1942ED7DBeccE9f4c28a6);
-        //0x090aeeb45e7e6c5587bdbe17ef3633ef103c949c
+        //0xb4344ff6d55e9304d50136c4a2af2280ad4c8070
         reactor = new Reactor(
             address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(msg.sender)
         );
-        //0x4418e103b33f8cca4cfcfe3b83f83b4afeb543d5
+        //0x12e1d4d4c151314149b8bff3fd6dff395524a115
         
         // reactor = new Reactor( 
         //     address(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290), 
