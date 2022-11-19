@@ -10,3 +10,6 @@
 [submodule "sandfuse-foundry/lib/v3-periphery-foundry"]
 	path = sandfuse-foundry/lib/v3-periphery-foundry
 	url = https://github.com/gakonst/v3-periphery-foundry
+[submodule "sandfuse-foundry/lib/v3-core"]
+	path = sandfuse-foundry/lib/v3-core
+	url = https://github.com/Uniswap/v3-core
