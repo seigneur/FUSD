@@ -27,8 +27,8 @@ export function FUSDNFT(fusdobjInst:FUSDNFTOBJ) {
           <Card.Title tag="h2">Loan NFT </Card.Title>
           <p></p>
           <Card.Actions className="justify-end">
-            {/* <Button color="primary"><ApproveRepayFUSD /></Button> */}
-            {/* <Button color="primary"><ApproveRepayNFT /></Button> */}
+            {/* <Button color="primary"><ApproveRepayFUSD /></Button>
+            <Button color="primary"><ApproveRepayNFT /></Button> */}
             <Button color="primary"><Repay  tokenId={"0"}/></Button>
 
             <Link href="https://testnets.opensea.io/assets/goerli/0x856d3df560badc083ea15933b8947e02b501803c/0" target="_blank" className="btn btn-secondary">NFT</Link>

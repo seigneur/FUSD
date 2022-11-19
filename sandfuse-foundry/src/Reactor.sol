@@ -82,7 +82,9 @@ contract Reactor is ReentrancyGuard {
         return tokenId;
     }
 
-    function generateVault() internal returns (address) {
+    function generateVault() 
+        internal 
+        returns (address) {
         return
             address(
                 new Vault{
