@@ -77,7 +77,7 @@ function App() {
 
                   <Stats.Stat>
                     <Stats.Stat.Item variant="title">Proof Of Reserve</Stats.Stat.Item>
-                    <Stats.Stat.Item variant="value">{ethers.utils.formatUnits(porData?.data,8)}</Stats.Stat.Item>
+                    {/* <Stats.Stat.Item variant="value">{ethers.utils.formatUnits(porData?.data,8)}</Stats.Stat.Item> */}
                     <Stats.Stat.Item variant="desc">
                       ↗︎ 400 (22%)
                     </Stats.Stat.Item>
