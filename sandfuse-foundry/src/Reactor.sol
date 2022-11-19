@@ -14,6 +14,8 @@ import "forge-std/console.sol";
 contract Reactor is ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeERC20 for IERC20Burnable;
+
+    event LIQUIDATE(uint amount, address collateral);
     
     IFusdNFT fusdNFT;
     address immutable public collateral;
@@ -85,7 +87,9 @@ contract Reactor is ReentrancyGuard {
         return tokenId;
     }
 
-    function generateVault() internal returns (address) {
+    function generateVault() 
+        internal 
+        returns (address) {
         return
             address(
                 new Vault{
@@ -173,6 +177,9 @@ contract Reactor is ReentrancyGuard {
             sendToAddress,
             fusdAmt
         );
+
+        emit LIQUIDATE(collateralAmount, collateral);
+
         fusdNFT.burn(tokenId);
         return true;
     }

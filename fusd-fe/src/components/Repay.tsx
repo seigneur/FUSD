@@ -1,12 +1,14 @@
 import * as React from 'react'
 import { usePrepareContractWrite, useContractWrite, useWaitForTransaction } from 'wagmi'
 import { ethers } from "ethers";
+import configData from "../../src/assets/contracts.json";
+
 interface RepayObj {
   tokenId:string;
 }
 export function Repay(repayInst: RepayObj) {
  const { config } = usePrepareContractWrite({
-  address: '0x06d5bBd6FD6D8e56362e7866D2bc16b2200c3907',
+  address: configData.REACTOR,
   abi: [
     {
       "inputs": [

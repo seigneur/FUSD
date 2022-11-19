@@ -1,7 +1,7 @@
 ## Sandfuse Lending
 ![Design](./assets/fuse-logo.png "")
 
-We intend to create a P2P lending platform on chain. The general design idea is as follows - 
+We intend to create a Proof Of Reserve backed lending platform on chain. The general design idea is as follows - 
 ![Design](./assets/fuse.png?raw=true "Design")
 
 ## Proof of Reserve Backed lending protocol.
@@ -25,7 +25,5 @@ The dynamic NFT's represent the underlying collateral and the owner of the NFT c
 In a situation where the treasury via fees has enough funds to back FUSD, it may choose to auction the NFT instead. As long as the 
 reserves are available an investor may choose to buy the collateral for price appreciation in the future. It can also be used for reinsurance purposes.
 
-TODO
-1. Use Goerli to test the contract and verify that can borrow.
-2. Integrate UI
-3. Add Lender contracts 
+## Polygon deployment addresses
+https://polygonscan.com/address/0x4418e103b33f8cca4cfcfe3b83f83b4afeb543d5
