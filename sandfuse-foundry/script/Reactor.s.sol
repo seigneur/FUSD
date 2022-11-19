@@ -52,7 +52,6 @@ contract DeployReactor is Script {
             address(WBTC), address(nft), address(oracle), address(fusd), address(clv1), address(msg.sender)
         );
         //0x12e1d4d4c151314149b8bff3fd6dff395524a115
-        
         // reactor = new Reactor( 
         //     address(0xd781961768e2625b2AEf0E654a21Cb71Ad2B3290), 
         //     address(0x570A528a6972060c5AA202fcd2a2915300831bcB), 

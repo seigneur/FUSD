@@ -4,7 +4,7 @@ pragma solidity ^0.8.16;
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 import "openzeppelin-contracts/access/Ownable.sol";
 
-contract KeepersCounter is KeeperCompatibleInterface, Ownable {
+contract FUSDKeeper is KeeperCompatibleInterface, Ownable {
     uint256 public counter;
     uint256 public lastTimeStamp;
 
@@ -53,13 +53,13 @@ contract KeepersCounter is KeeperCompatibleInterface, Ownable {
         bytes memory payload = abi.encodeWithSignature("tokenLast()");
         (bool success, bytes memory returnData) = address(reactor).staticcall(payload);
         require(success);
-        uint tokenLast = abi.decode(returnData, (uint));
+        uint256 tokenLast = abi.decode(returnData, (uint256));
 
-        for (uint i=0; i<=tokenLast; ++i) {
-            payload = abi.encodeWithSignature("tokenIdPrices(uint)", tokenLast);
+        for (uint256 i=0; i<=tokenLast; ++i) {
+            payload = abi.encodeWithSignature("tokenIdPrices(uint256)", i);
             (success, returnData) = address(reactor).staticcall(payload);
             if (success) {
-                int maxPriceDecrease = abi.decode(returnData, (int));
+                int256 maxPriceDecrease = abi.decode(returnData, (int256));
                 upkeepNeeded = priceFromOracle() < maxPriceDecrease;
                 performData = abi.encode(tokenLast);
             }
@@ -72,7 +72,7 @@ contract KeepersCounter is KeeperCompatibleInterface, Ownable {
         external 
         override 
     {
-        uint tokenId = abi.decode(performData, (uint));
+        uint256 tokenId = abi.decode(performData, (uint256));
         bytes memory payload = abi.encodeWithSignature("repay(uint256)", tokenId);
         (bool success,) = address(reactor).call(payload);
         require(success);

@@ -77,7 +77,7 @@ function App() {
 
                   <Stats.Stat>
                     <Stats.Stat.Item variant="title">Proof Of Reserve</Stats.Stat.Item>
-                    {/* <Stats.Stat.Item variant="value">{ethers.utils.formatUnits(porData?.data,18)}</Stats.Stat.Item> */}
+                    <Stats.Stat.Item variant="value">{ethers.utils.formatUnits(porData?.data,8)}</Stats.Stat.Item>
                     <Stats.Stat.Item variant="desc">
                       ↗︎ 400 (22%)
                     </Stats.Stat.Item>
@@ -181,7 +181,8 @@ function App() {
                 </Card>
               </div>
                     <Divider></Divider>
-                    <h2>List of Positions Presented as Dynamic NFT's</h2>
+                    <h2>List of Positions Presented as Dynamic NFT's </h2>
+                    <h5>(Note: Below are hardcoded for testing purposes)</h5>
               <div className="h-2 w-auto"></div>
               <div className="item w-auto h-auto">
                 {/* <Collapse icon="arrow">
