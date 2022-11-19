@@ -6,15 +6,12 @@ import "openzeppelin-contracts/access/Ownable.sol";
 
 contract KeepersCounter is KeeperCompatibleInterface, Ownable {
     uint256 public counter;
-    uint256 public immutable interval;
     uint256 public lastTimeStamp;
 
     address public reactor;
     address public priceOracle;
 
-    constructor(uint256 updateInterval, address _reactor, address _priceOracle) {
-        interval = updateInterval;
-        lastTimeStamp = block.timestamp;
+    constructor(address _reactor, address _priceOracle) {
         counter = 0;
         reactor = _reactor;
         priceOracle = _priceOracle;
@@ -58,13 +55,15 @@ contract KeepersCounter is KeeperCompatibleInterface, Ownable {
         require(success);
         uint tokenLast = abi.decode(returnData, (uint));
 
-        payload = abi.encodeWithSignature("tokenIdPrices(uint)", tokenLast);
-        (success, returnData) = address(reactor).staticcall(payload);
-        require(success);
-        int maxPriceDecrease = abi.decode(returnData, (int));
-
-        upkeepNeeded = priceFromOracle() < maxPriceDecrease;
-        performData = abi.encode(tokenLast);
+        for (uint i=0; i<=tokenLast; ++i) {
+            payload = abi.encodeWithSignature("tokenIdPrices(uint)", tokenLast);
+            (success, returnData) = address(reactor).staticcall(payload);
+            if (success) {
+                int maxPriceDecrease = abi.decode(returnData, (int));
+                upkeepNeeded = priceFromOracle() < maxPriceDecrease;
+                performData = abi.encode(tokenLast);
+            }
+        }
     }
 
     function performUpkeep(
