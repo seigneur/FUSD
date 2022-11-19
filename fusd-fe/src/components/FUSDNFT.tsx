@@ -31,7 +31,7 @@ export function FUSDNFT(fusdobjInst:FUSDNFTOBJ) {
             {/* <Button color="primary"><ApproveRepayNFT /></Button> */}
             <Button color="primary"><Repay  tokenId={"0"}/></Button>
 
-            <Link href="https://testnets.opensea.io/assets/goerli/0x1978d1c4476d8f0c65d1942ed7dbecce9f4c28a6/0" target="_blank" className="btn btn-secondary">NFT</Link>
+            <Link href="https://testnets.opensea.io/assets/goerli/0x856d3df560badc083ea15933b8947e02b501803c/0" target="_blank" className="btn btn-secondary">NFT</Link>
           </Card.Actions>
         </Card.Body>
       </Card>
