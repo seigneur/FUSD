@@ -7,3 +7,6 @@
 [submodule "sandfuse-foundry/lib/openzeppelin-contracts"]
 	path = sandfuse-foundry/lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "sandfuse-foundry/lib/v3-periphery-foundry"]
+	path = sandfuse-foundry/lib/v3-periphery-foundry
+	url = https://github.com/gakonst/v3-periphery-foundry
